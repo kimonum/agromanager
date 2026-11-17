@@ -1,40 +1,41 @@
 <?php
 
+//создаю абстрактный класс. Напрямую создать объект нельзя, только наследовать.
 abstract class Entity {
-
-    protected string $id;
-    protected string $name;
-
-    public function _construct(string $id, string $name) {
-        $this->setID($id);
-        $this->setName($name);
-    }
-
-    protected function setID(string $id): void
-    {
-        $trimmed = trim($id);
-        if ($trimmed === ''){
-            throw new \InvalidArgumentException("ID не может быть пустым")
+    //использую хуки свойств (Property Hooks) из PHP 8.5.
+    //хук set срабатывает при попытке записать значение.
+    public string $id{
+        set(string $value){
+            $trimmed = trim($value); //убираю лишние пробелы по краям
+            if ($trimmed === ''){
+                //валидация: если строка пустая, кидаю исключение
+                throw new \InvalidArgumentException(
+                    "ID не может быть пустым");
             }
-        $this->id = $trimmed; 
-    }
-
-    public function getID(): string
-    {
-        return $this->id;
-    }
-
-    protected function setName(string $name): void
-    {
-        $trimmed = trim($name);
-        if ($trimmed === ''){
-            throw new \InvalidArgumentException("Именование не может быть пустым")
+            $this->id = $trimmed; //присваиваю очищенное значение
         }
+    }
+    
+    public string $name{
+        set(string $value){
+
+        $trimmed = trim($value);
+        if ($trimmed === ''){
+            //валидация для имени
+            throw new \InvalidArgumentException(
+                "Поле Name не может быть пустым");
+        }
+
         $this->name = $trimmed;
+        }
     }
 
-    public function getName(): string
-    {
-        return $this->name;
+    //магический метод конструктор. Вызывается автоматически при создании объекта.
+    public function __construct(string $id, string $name) {
+        //присваиваю значения. Благодаря хукам выше (set),
+        //валидация запустится автоматически при записи.
+        $this->id = $id; // хуки запускаются автоматически
+        $this->name = $name;
     }
+
 }
