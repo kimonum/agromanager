@@ -1,43 +1,58 @@
 <?php
+$dirName = __DIR__;
+$entity = $dirName . "/../Entity.php";
 
-//namespace Physicals;
-
-$dirName = __DIR__; //получаю текущую директорию
-$entity = $dirName . "/../Entity.php"; //формирую путь на уровень выше
-
-//проверяю, существует ли файл, чтоб не словить фаталку
-if(file_exists($entity)) {
+if (file_exists($entity)) {
     require_once($entity);
     echo "\nФайл |{$entity}| подключен!\n";
-}else{
-    echo "Ошибка в формировании адреса";
+} else {
+    echo "Ошибка в форматировании адреса";
 }
 
-//класс Physical наследуется от Entity. Абстрактный.
+/**
+ * Абстрактный базовый класс для всех физических объектов в системе
+ * Расширяет базовую сущность (Entity), добавляя понятие "износа" (wear)
+ * Так как класс абстрактный, он не может быть инстанцирован напрямую
+ */
 abstract class Physical extends Entity
 {
-    //хук свойства износа (wear). По умолчанию 0.
-    public protected(set) float $wear = 0.0{
-        set(float $value){
-            //валидация: износ не может быть меньше 0 или больше 100
-            if($value < 0.0 || $value > 100.0){
-                //если значение некорректное, выбрасываю исключение
-                throw new \OutOfRangeException("Износ может принимать значения от 0 до 100");
-            }
-            $this->wear = $value;
+    //Добавили свойство веса
+    public protected(set) float $weight;
+
+    /**
+     * Уровень износа объекта в процентах (от 0.0 до 100.0)
+     * Используем Property Hooks для строгой инкапсуляции инварианта
+     */
+    public protected(set) float $wear = 0.0 {
+    set(float $value) {
+        if ($value < 0.0 || $value > 100.0) {
+            throw new \OutOfRangeException(message: "Износ может принимать значения от 0 до 100");
         }
+        //Явно указываем, что значение нужно сохранить в это же свойство
+        $this->wear = $value; 
+    }
+}
+
+    /**
+     * Конструктор физического объекта.
+     */
+    public function __construct(string $id, string $name, float $weight) {
+        parent::__construct($id, $name);
+        $this->weight = $weight;
     }
 
-    //метод обслуживания (ремонта) объекта
+    /**
+     * Полный ремонт (восстановление) объекта
+     * Сбрасывает износ до нуля
+     */
     public function service(): Physical
     {
-        //сбрасываю износ до нуля (сработает хук set и пропустит значение 0)
         $this->wear = 0.0;
-        return $this; //возвращаю $this для реализации паттерна "Fluent Interface" (цепочек вызовов)
+        return $this;
     }
 
-    //абстрактный метод. У физических объектов есть логика прикрепления к другим объектам.
-    //наследники обязаны его реализовать.
+    /**
+     * Контракт: любой физический объект должен уметь прикрепляться к другому.
+     */
     abstract public function attachTo(Physical $physical): Physical;
-
 }
