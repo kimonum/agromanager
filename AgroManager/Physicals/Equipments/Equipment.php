@@ -3,7 +3,7 @@
 //Блок подключения зависимостей
 //Подключаем родительский класс Physical
 $dirName = __DIR__;
-$physical = $dirName . "/../../Physical.php";
+$physical = $dirName . "/../Physical.php";
 
 if(file_exists($physical)) {
     require_once($physical);
@@ -15,7 +15,7 @@ if(file_exists($physical)) {
 
 //Подключаем интерфейс PoweredInterface
 $dirName = __DIR__;
-$powered = $dirName . "/../../../Contracts/PoweredInterface.php";
+$powered = $dirName . "/../../Contracts/PoweredInterface.php";
 
 if(file_exists($powered)) {
     require_once($powered);
@@ -65,6 +65,15 @@ abstract class Equipment extends Physical implements PoweredInterface
         //Добавляем топливо, но не позволяем баку переполниться выше 100%
         //min(100.0, ...) гарантирует, что мы не превысим верхнюю границу
         $this->fuelLevel = min(100.0, $this->fuelLevel + $units);
+    }
+
+    /**
+     * Прикрепление оборудования к другому физическому объекту
+     */
+    public function attachTo(Physical $physical): Physical
+    {
+        $this->wear = min(100.0, $this->wear + 1.0);
+        return $this;
     }
 
     /**
